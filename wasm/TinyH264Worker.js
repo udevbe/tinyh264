@@ -6,7 +6,7 @@ var Module = {
   }
 }
 
-importScripts('TinyH264bsdDecoder.js', 'TinyH264.js')
+importScripts('TinyH264Decoder.js', 'TinyH264.js')
 
 var decoder = null
 
