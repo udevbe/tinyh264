@@ -42,7 +42,7 @@ H264bsdCanvas will create a 3d context and use a shader program to display YUV e
 
 The project also contains code for a web worker implementation. Here's an example of how it's used:
 ```
-var decoder = new Worker("h264bsd_worker.js");
+var decoder = new Worker("TinyH264Worker.js");
 var display = new H264bsdCanvas(myCanvasElement);
 
 decoder.addEventListener('message', function(e) {

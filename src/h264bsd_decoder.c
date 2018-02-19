@@ -27,15 +27,9 @@
           h264bsdInit
           h264bsdDecode
           h264bsdShutdown
-          h264bsdCurrentImage
-          h264bsdNextOutputPicture
-          h264bsdPicWidth
-          h264bsdPicHeight
-          h264bsdFlushBuffer
-          h264bsdCheckValidParamSets
-          h264bsdVideoRange
-          h264bsdMatrixCoefficients
-          h264bsdCroppingParams
+
+
+
 
 ------------------------------------------------------------------------------*/
 
@@ -94,8 +88,6 @@ u32 h264bsdInit(storage_t *pStorage, u32 noOutputReordering)
     u32 size;
 /* Code */
 
-    ASSERT(pStorage);
-
     h264bsdInitStorage(pStorage);
 
     /* allocate mbLayer to be next multiple of 64 to enable use of
@@ -114,7 +106,7 @@ u32 h264bsdInit(storage_t *pStorage, u32 noOutputReordering)
 
 /*------------------------------------------------------------------------------
 
-    Function: h264bsdDecode
+    Function: h264bsdDecodeInternal
 
         Functional description:
             Decode a NAL unit. This function calls other modules to perform
@@ -131,8 +123,6 @@ u32 h264bsdInit(storage_t *pStorage, u32 noOutputReordering)
             pStorage        pointer to storage data structure
             byteStrm        pointer to stream buffer given by application
             len             length of the buffer in bytes
-            picId           identifier for a picture, assigned by the
-                            application
 
         Outputs:
             readBytes       number of bytes read from the stream is stored
@@ -144,12 +134,12 @@ u32 h264bsdInit(storage_t *pStorage, u32 noOutputReordering)
             H264BSD_HDRS_RDY        param sets activated, information like
                                     picture dimensions etc can be read
             H264BSD_ERROR           error in decoding
-            H264BSD_PARAM_SET_ERROR serius error in decoding, failed to
+            H264BSD_PARAM_SET_ERROR serious error in decoding, failed to
                                     activate param sets
 
 ------------------------------------------------------------------------------*/
 
-u32 h264bsdDecode(storage_t *pStorage, u8 *byteStrm, u32 len, u32 picId,
+u32 h264bsdDecodeInternal(storage_t *pStorage, u8 *byteStrm, u32 len,
     u32 *readBytes)
 {
 
@@ -163,13 +153,6 @@ u32 h264bsdDecode(storage_t *pStorage, u8 *byteStrm, u32 len, u32 picId,
     strmData_t strm;
     u32 accessUnitBoundaryFlag = HANTRO_FALSE;
     u32 picReady = HANTRO_FALSE;
-
-/* Code */
-
-    ASSERT(pStorage);
-    ASSERT(byteStrm);
-    ASSERT(len);
-    ASSERT(readBytes);
 
     /* if previous buffer was not finished and same pointer given -> skip NAL
      * unit extraction */
@@ -313,7 +296,7 @@ u32 h264bsdDecode(storage_t *pStorage, u8 *byteStrm, u32 len, u32 picId,
                 if (h264bsdIsStartOfPicture(pStorage))
                 {
                     pStorage->numConcealedMbs = 0;
-                    pStorage->currentPicId    = picId;
+                    pStorage->currentPicId    = 0;
 
                     tmp = h264bsdCheckPpsId(&strm, &ppsId);
                     ASSERT(tmp == HANTRO_OK);
@@ -514,6 +497,26 @@ u32 h264bsdDecode(storage_t *pStorage, u8 *byteStrm, u32 len, u32 picId,
 
 }
 
+u32 h264bsdDecode(storage_t *pStorage, u8 *byteStrm, u32 len, u8 **picture, u32 *width, u32 *height) {
+  u32 bytesRead = 0;
+  u32 retCode = 3;
+  u32 readBytes = 0;
+
+    do {
+      len -= readBytes;
+      byteStrm += readBytes;
+      retCode = h264bsdDecodeInternal(pStorage, byteStrm, len, &readBytes);
+    } while (retCode == 0 || retCode == 2);
+
+    if (retCode == H264BSD_PIC_RDY) {
+      *width = (pStorage->activeSps->picWidthInMbs)*16;
+      *height = (pStorage->activeSps->picHeightInMbs)*16;
+      *picture = h264bsdDpbOutputPicture(pStorage->dpb)->data;
+    }
+
+    return retCode;
+}
+
 /*------------------------------------------------------------------------------
 
     Function: h264bsdShutdown
@@ -571,522 +574,6 @@ void h264bsdShutdown(storage_t *pStorage)
     if(pStorage->conversionBuffer != NULL) FREE(pStorage->conversionBuffer);
 
     h264bsdFreeDpb(pStorage->dpb);
-
-}
-
-/*------------------------------------------------------------------------------
-
-    Function: h264bsdNextOutputPicture
-
-        Functional description:
-            Get next output picture in display order.
-
-        Inputs:
-            pStorage    pointer to storage data structure
-
-        Outputs:
-            picId       identifier of the picture will be stored here
-            isIdrPic    IDR flag of the picture will be stored here
-            numErrMbs   number of concealed macroblocks in the picture
-                        will be stored here
-
-        Returns:
-            pointer to the picture data
-            NULL if no pictures available for display
-
-------------------------------------------------------------------------------*/
-
-u8* h264bsdNextOutputPicture(storage_t *pStorage, u32 *picId, u32 *isIdrPic,
-    u32 *numErrMbs)
-{
-
-/* Variables */
-
-    dpbOutPicture_t *pOut;
-
-/* Code */
-
-    ASSERT(pStorage);
-
-    pOut = h264bsdDpbOutputPicture(pStorage->dpb);
-    
-    if (pOut != NULL)
-    {
-        *picId = pOut->picId;
-        *isIdrPic = pOut->isIdr;
-        *numErrMbs = pOut->numErrMbs;
-        return (pOut->data);
-    }
-    else
-        return(NULL);
-
-}
-
-
-/*------------------------------------------------------------------------------
-
-    Function: h264bsdNextOutputPictureRGBA
-
-        Functional description:
-            Get next output picture in display order, converted to RGBA.
-            RGBA is the color format most commonly used by OpenGL.
-
-        Inputs:
-            pStorage    pointer to storage data structure
-
-        Outputs:
-            picId       identifier of the picture will be stored here
-            isIdrPic    IDR flag of the picture will be stored here
-            numErrMbs   number of concealed macroblocks in the picture
-                        will be stored here
-
-        Returns:
-            pointer to the picture data
-            NULL if no pictures available for display
-
-------------------------------------------------------------------------------*/
-u32* h264bsdNextOutputPictureRGBA(storage_t *pStorage, u32 *picId, u32 *isIdrPic, u32 *numErrMbs)
-{
-    u32 width = h264bsdPicWidth(pStorage) * 16;
-    u32 height = h264bsdPicHeight(pStorage) * 16;
-    u8* data = h264bsdNextOutputPicture(pStorage, picId, isIdrPic, numErrMbs);
-    size_t rgbSize = sizeof(u32) * width * height;
-
-    if(data == NULL) return NULL;
-
-    if(pStorage->conversionBufferSize < rgbSize)
-    {
-        if(pStorage->conversionBuffer != NULL) free(pStorage->conversionBuffer);
-        pStorage->conversionBufferSize = rgbSize;
-        pStorage->conversionBuffer = (u32*)malloc(rgbSize);
-    }
-
-    h264bsdConvertToRGBA(width, height, data, pStorage->conversionBuffer);
-    return pStorage->conversionBuffer;
-}
-
-/*------------------------------------------------------------------------------
-
-    Function: h264bsdNextOutputPictureRGBA
-
-        Functional description:
-            Get next output picture in display order, converted to BGRA.
-            BGRA is the color format most commonly used by Windows.
-
-        Inputs:
-            pStorage    pointer to storage data structure
-
-        Outputs:
-            picId       identifier of the picture will be stored here
-            isIdrPic    IDR flag of the picture will be stored here
-            numErrMbs   number of concealed macroblocks in the picture
-                        will be stored here
-
-        Returns:
-            pointer to the picture data
-            NULL if no pictures available for display
-
-------------------------------------------------------------------------------*/
-u32* h264bsdNextOutputPictureBGRA(storage_t *pStorage, u32 *picId, u32 *isIdrPic, u32 *numErrMbs)
-{
-    u32 width = h264bsdPicWidth(pStorage) * 16;
-    u32 height = h264bsdPicHeight(pStorage) * 16;
-    u8* data = h264bsdNextOutputPicture(pStorage, picId, isIdrPic, numErrMbs);
-    size_t rgbSize = sizeof(u32) * width * height;
-
-    if(data == NULL) return NULL;
-
-    if(pStorage->conversionBufferSize < rgbSize)
-    {
-        if(pStorage->conversionBuffer != NULL) free(pStorage->conversionBuffer);
-        pStorage->conversionBufferSize = rgbSize;
-        pStorage->conversionBuffer = (u32*)malloc(rgbSize);
-    }
-
-    h264bsdConvertToBGRA(width, height, data, pStorage->conversionBuffer);
-    return pStorage->conversionBuffer;
-}
-
-/*------------------------------------------------------------------------------
-
-    Function: h264bsdNextOutputPictureYCbCrA
-
-        Functional description:
-            Get next output picture in display order, converted to YCbCrA.
-            YCbCrA is a 4:4:4 format that uses u32 pixels where the MSB is alpha.
-
-        Inputs:
-            pStorage    pointer to storage data structure
-
-        Outputs:
-            picId       identifier of the picture will be stored here
-            isIdrPic    IDR flag of the picture will be stored here
-            numErrMbs   number of concealed macroblocks in the picture
-                        will be stored here
-
-        Returns:
-            pointer to the picture data
-            NULL if no pictures available for display
-
-------------------------------------------------------------------------------*/
-u32* h264bsdNextOutputPictureYCbCrA(storage_t *pStorage, u32 *picId, u32 *isIdrPic, u32 *numErrMbs)
-{
-    u32 width = h264bsdPicWidth(pStorage) * 16;
-    u32 height = h264bsdPicHeight(pStorage) * 16;
-    u8* data = h264bsdNextOutputPicture(pStorage, picId, isIdrPic, numErrMbs);
-    size_t rgbSize = sizeof(u32) * width * height;
-
-    if(data == NULL) return NULL;
-
-    if(pStorage->conversionBufferSize < rgbSize)
-    {
-        if(pStorage->conversionBuffer != NULL) free(pStorage->conversionBuffer);
-        pStorage->conversionBufferSize = rgbSize;
-        pStorage->conversionBuffer = (u32*)malloc(rgbSize);
-    }
-
-    h264bsdConvertToYCbCrA(width, height, data, pStorage->conversionBuffer);
-    return pStorage->conversionBuffer;
-}
-
-/*------------------------------------------------------------------------------
-
-    Function: h264bsdPicWidth
-
-        Functional description:
-            Get width of the picture in macroblocks
-
-        Inputs:
-            pStorage    pointer to storage data structure
-
-        Outputs:
-            none
-
-        Returns:
-            picture width
-            0 if parameters sets not yet activated
-
-------------------------------------------------------------------------------*/
-
-u32 h264bsdPicWidth(storage_t *pStorage)
-{
-
-/* Variables */
-
-/* Code */
-
-    ASSERT(pStorage);
-
-    if (pStorage->activeSps)
-        return(pStorage->activeSps->picWidthInMbs);
-    else
-        return(0);
-
-}
-
-/*------------------------------------------------------------------------------
-
-    Function: h264bsdPicHeight
-
-        Functional description:
-            Get height of the picture in macroblocks
-
-        Inputs:
-            pStorage    pointer to storage data structure
-
-        Outputs:
-            none
-
-        Returns:
-            picture width
-            0 if parameters sets not yet activated
-
-------------------------------------------------------------------------------*/
-
-u32 h264bsdPicHeight(storage_t *pStorage)
-{
-
-/* Variables */
-
-/* Code */
-
-    ASSERT(pStorage);
-
-    if (pStorage->activeSps)
-        return(pStorage->activeSps->picHeightInMbs);
-    else
-        return(0);
-
-}
-
-/*------------------------------------------------------------------------------
-
-    Function: h264bsdFlushBuffer
-
-        Functional description:
-            Flush the decoded picture buffer, see dpb.c for details
-
-        Inputs:
-            pStorage    pointer to storage data structure
-
-------------------------------------------------------------------------------*/
-
-void h264bsdFlushBuffer(storage_t *pStorage)
-{
-
-/* Variables */
-
-/* Code */
-
-    ASSERT(pStorage);
-
-    h264bsdFlushDpb(pStorage->dpb);
-
-}
-
-/*------------------------------------------------------------------------------
-
-    Function: h264bsdCheckValidParamSets
-
-        Functional description:
-            Check if any valid parameter set combinations (SPS/PPS) exists.
-
-        Inputs:
-            pStorage    pointer to storage structure
-
-        Returns:
-            1       at least one valid SPS/PPS combination found
-            0       no valid param set combinations found
-
-
-------------------------------------------------------------------------------*/
-
-u32 h264bsdCheckValidParamSets(storage_t *pStorage)
-{
-
-/* Variables */
-
-/* Code */
-
-    ASSERT(pStorage);
-
-    return(h264bsdValidParamSets(pStorage) == HANTRO_OK ? 1 : 0);
-
-}
-
-/*------------------------------------------------------------------------------
-
-    Function: h264bsdVideoRange
-
-        Functional description:
-            Get value of video_full_range_flag received in the VUI data.
-
-        Inputs:
-            pStorage    pointer to storage structure
-
-        Returns:
-            1   video_full_range_flag received and value is 1
-            0   otherwise
-
-------------------------------------------------------------------------------*/
-
-u32 h264bsdVideoRange(storage_t *pStorage)
-{
-
-/* Variables */
-
-/* Code */
-
-    ASSERT(pStorage);
-
-    if (pStorage->activeSps && pStorage->activeSps->vuiParametersPresentFlag &&
-        pStorage->activeSps->vuiParameters &&
-        pStorage->activeSps->vuiParameters->videoSignalTypePresentFlag &&
-        pStorage->activeSps->vuiParameters->videoFullRangeFlag)
-        return(1);
-    else /* default value of video_full_range_flag is 0 */
-        return(0);
-
-}
-
-/*------------------------------------------------------------------------------
-
-    Function: h264bsdMatrixCoefficients
-
-        Functional description:
-            Get value of matrix_coefficients received in the VUI data
-
-        Inputs:
-            pStorage    pointer to storage structure
-
-        Outputs:
-            value of matrix_coefficients if received
-            2   otherwise (this is the default value)
-
-------------------------------------------------------------------------------*/
-
-u32 h264bsdMatrixCoefficients(storage_t *pStorage)
-{
-
-/* Variables */
-
-/* Code */
-
-    ASSERT(pStorage);
-
-    if (pStorage->activeSps && pStorage->activeSps->vuiParametersPresentFlag &&
-        pStorage->activeSps->vuiParameters &&
-        pStorage->activeSps->vuiParameters->videoSignalTypePresentFlag &&
-        pStorage->activeSps->vuiParameters->colourDescriptionPresentFlag)
-        return(pStorage->activeSps->vuiParameters->matrixCoefficients);
-    else /* default unspecified */
-        return(2);
-
-}
-
-/*------------------------------------------------------------------------------
-
-    Function: hh264bsdCroppingParams
-
-        Functional description:
-            Get cropping parameters of the active SPS
-
-        Inputs:
-            pStorage    pointer to storage structure
-
-        Outputs:
-            croppingFlag    flag indicating if cropping params present is
-                            stored here
-            leftOffset      cropping left offset in pixels is stored here
-            width           width of the image after cropping is stored here
-            topOffset       cropping top offset in pixels is stored here
-            height          height of the image after cropping is stored here
-
-        Returns:
-            none
-
-------------------------------------------------------------------------------*/
-
-void h264bsdCroppingParams(storage_t *pStorage, u32 *croppingFlag,
-    u32 *leftOffset, u32 *width, u32 *topOffset, u32 *height)
-{
-
-/* Variables */
-
-/* Code */
-
-    ASSERT(pStorage);
-
-    if (pStorage->activeSps && pStorage->activeSps->frameCroppingFlag)
-    {
-        *croppingFlag = 1;
-        *leftOffset = 2 * pStorage->activeSps->frameCropLeftOffset;
-        *width = 16 * pStorage->activeSps->picWidthInMbs -
-                 2 * (pStorage->activeSps->frameCropLeftOffset +
-                      pStorage->activeSps->frameCropRightOffset);
-        *topOffset = 2 * pStorage->activeSps->frameCropTopOffset;
-        *height = 16 * pStorage->activeSps->picHeightInMbs -
-                  2 * (pStorage->activeSps->frameCropTopOffset +
-                       pStorage->activeSps->frameCropBottomOffset);
-    }
-    else
-    {
-        *croppingFlag = 0;
-        *leftOffset = 0;
-        *width = 0;
-        *topOffset = 0;
-        *height = 0;
-    }
-
-}
-
-/*------------------------------------------------------------------------------
-
-    Function: h264bsdSampleAspectRatio
-
-        Functional description:
-            Get aspect ratio received in the VUI data
-
-        Inputs:
-            pStorage    pointer to storage structure
-
-        Outputs:
-            sarWidth    sample aspect ratio height
-            sarHeight   sample aspect ratio width
-
-------------------------------------------------------------------------------*/
-
-void h264bsdSampleAspectRatio(storage_t *pStorage, u32 *sarWidth, u32 *sarHeight)
-{
-
-/* Variables */
-    u32 w = 1;
-    u32 h = 1;
-/* Code */
-
-    ASSERT(pStorage);
-
-
-    if (pStorage->activeSps &&
-        pStorage->activeSps->vuiParametersPresentFlag &&
-        pStorage->activeSps->vuiParameters &&
-        pStorage->activeSps->vuiParameters->aspectRatioPresentFlag )
-    {
-        switch (pStorage->activeSps->vuiParameters->aspectRatioIdc)
-        {
-            case ASPECT_RATIO_UNSPECIFIED:  w =   0; h =  0; break;
-            case ASPECT_RATIO_1_1:          w =   1; h =  1; break;
-            case ASPECT_RATIO_12_11:        w =  12; h = 11; break;
-            case ASPECT_RATIO_10_11:        w =  10; h = 11; break;
-            case ASPECT_RATIO_16_11:        w =  16; h = 11; break;
-            case ASPECT_RATIO_40_33:        w =  40; h = 33; break;
-            case ASPECT_RATIO_24_11:        w =  24; h = 11; break;
-            case ASPECT_RATIO_20_11:        w =  20; h = 11; break;
-            case ASPECT_RATIO_32_11:        w =  32; h = 11; break;
-            case ASPECT_RATIO_80_33:        w =  80; h = 33; break;
-            case ASPECT_RATIO_18_11:        w =  18; h = 11; break;
-            case ASPECT_RATIO_15_11:        w =  15; h = 11; break;
-            case ASPECT_RATIO_64_33:        w =  64; h = 33; break;
-            case ASPECT_RATIO_160_99:       w = 160; h = 99; break;
-            case ASPECT_RATIO_EXTENDED_SAR:
-                w = pStorage->activeSps->vuiParameters->sarWidth;
-                h = pStorage->activeSps->vuiParameters->sarHeight;
-                if ((w == 0) || (h == 0))
-                    w = h = 0;
-                break;
-            default:
-                w = 0;
-                h = 0;
-                break;
-        }
-    }
-
-    /* set aspect ratio*/
-    *sarWidth = w;
-    *sarHeight = h;
-
-}
-
-/*------------------------------------------------------------------------------
-
-    Function: h264bsdProfile
-
-        Functional description:
-            Get profile information from active SPS
-
-        Inputs:
-            pStorage    pointer to storage structure
-
-        Outputs:
-            profile   current profile
-
-------------------------------------------------------------------------------*/
-u32 h264bsdProfile(storage_t *pStorage)
-{
-    if (pStorage->activeSps)
-        return pStorage->activeSps->profileIdc;
-    else
-        return 0;
 }
 
 /*------------------------------------------------------------------------------
@@ -1133,238 +620,4 @@ storage_t* h264bsdAlloc()
 void h264bsdFree(storage_t *pStorage)
 {
     free(pStorage);
-}
-
-/*------------------------------------------------------------------------------
-
-    Function: h264bsdConvertToRGBA
-
-        Functional description:
-            Convert decoded image data RGBA format.
-            RGBA is the color format most commonly used by OpenGL.
-            RGBA format uses u32 pixels where the MSB is alpha.
-            *Note* While this function is available, it is not heavily optimized.
-            If possible, you should use decoded image data directly. 
-            This function should only be used when there is no other way to get RGBA data.
-
-        Inputs:
-            width       width of the image in pixels
-            height      height of the image in pixels
-            data        pointer to decoded image data
-
-        Outputs:
-            pOutput     pointer to the buffer where the RGBA data will be written
-
-        Returns:
-            none
-
-------------------------------------------------------------------------------*/
-
-void h264bsdConvertToRGBA(u32 width, u32 height, u8* data, u32 *pOutput)
-{
-    const int w = (int)width;
-    const int h = (int)height;
-
-    int x = 0;
-    int y = 0;
-
-    size_t ySize = w * h;
-    size_t cbSize = w/2 * h/2;
-
-    u8* luma = data;
-    u8* cb = data + ySize;
-    u8* cr = data + ySize + cbSize;
-    u32* rgba = pOutput;
-
-    while(y < h)
-    {
-        int c = *luma - 16;
-        int d = *cb - 128;
-        int e = *cr - 128;
-
-        u32 r = (u32)CLIP1((298*c         + 409*e + 128) >> 8);
-        u32 g = (u32)CLIP1((298*c - 100*d - 208*e + 128) >> 8);
-        u32 b = (u32)CLIP1((298*c + 516*d         + 128) >> 8);
-
-        u32 pixel = 0xff;
-        pixel = (pixel << 8) + b;
-        pixel = (pixel << 8) + g;
-        pixel = (pixel << 8) + r;
-
-        *rgba = pixel;
-
-        ++x;
-        ++rgba;
-        ++luma;
-
-        if(!(x & 1))
-        {
-            ++cb;
-            ++cr;
-        }
-
-        if(x < w) continue;
-
-        x = 0;
-        ++y;
-
-        if(y & 1)
-        {
-            cb -= w/2;
-            cr -= w/2;
-        }
-    }
-}
-
-/*------------------------------------------------------------------------------
-
-    Function: h264bsdConvertToBGRA
-
-        Functional description:
-            Convert decoded image data BGRA format.
-            BGRA is the color format most commonly used by Windows.
-            BGRA format uses u32 pixels where the MSB is alpha.
-            *Note* While this function is available, it is not heavily optimized.
-            If possible, you should use decoded image data directly. 
-            This function should only be used when there is no other way to get BGRA data.
-
-        Inputs:
-            width       width of the image in pixels
-            height      height of the image in pixels
-            data        pointer to decoded image data
-
-        Outputs:
-            pOutput     pointer to the buffer where the BGRA data will be written
-
-        Returns:
-            none
-
-------------------------------------------------------------------------------*/
-
-void h264bsdConvertToBGRA(u32 width, u32 height, u8* data, u32 *pOutput)
-{
-    const int w = (int)width;
-    const int h = (int)height;
-
-    int x = 0;
-    int y = 0;
-
-    size_t ySize = w * h;
-    size_t cbSize = w/2 * h/2;
-
-    u8* luma = data;
-    u8* cb = data + ySize;
-    u8* cr = data + ySize + cbSize;
-    u32* bgra = pOutput;
-
-    while(y < h)
-    {
-        int c = *luma - 16;
-        int d = *cb - 128;
-        int e = *cr - 128;
-
-        u32 r = (u32)CLIP1((298*c         + 409*e + 128) >> 8);
-        u32 g = (u32)CLIP1((298*c - 100*d - 208*e + 128) >> 8);
-        u32 b = (u32)CLIP1((298*c + 516*d         + 128) >> 8);
-
-        u32 pixel = 0xff;
-        pixel = (pixel << 8) + r;
-        pixel = (pixel << 8) + g;
-        pixel = (pixel << 8) + b;
-
-        *bgra = pixel;
-
-        ++x;
-        ++bgra;
-        ++luma;
-
-        if(!(x & 1))
-        {
-            ++cb;
-            ++cr;
-        }
-
-        if(x < w) continue;
-
-        x = 0;
-        ++y;
-
-        if(y & 1)
-        {
-            cb -= w/2;
-            cr -= w/2;
-        }
-    }
-}
-
-/*------------------------------------------------------------------------------
-
-    Function: h264bsdConvertToYCbCrA
-
-        Functional description:
-            Convert decoded image data YCbCrA format.
-            YCbCrA is a 4:4:4 format that uses u32 pixels where the MSB is alpha.
-            *Note* While this function is available, it is not heavily optimized.
-            If possible, you should use decoded image data directly. 
-            This function should only be used when there is no other way to get YCbCrA data.
-
-        Inputs:
-            width       width of the image in pixels
-            height      height of the image in pixels
-            data        pointer to decoded image data
-
-        Outputs:
-            pOutput     pointer to the buffer where the YCbCrA data will be written
-
-        Returns:
-            none
-
-------------------------------------------------------------------------------*/
-
-void h264bsdConvertToYCbCrA(u32 width, u32 height, u8* data, u32 *pOutput)
-{
-    const int w = (int)width;
-    const int h = (int)height;
-
-    int x = 0;
-    int y = 0;
-
-    size_t ySize = w * h;
-    size_t cbSize = w/2 * h/2;
-
-    u8* luma = data;
-    u8* cb = data + ySize;
-    u8* cr = data + ySize + cbSize;
-    u32* yCbCr = pOutput;
-
-    while(y < h)
-    {
-        u32 pixel = 0xff;
-        pixel = (pixel << 8) + *cr;
-        pixel = (pixel << 8) + *cb;
-        pixel = (pixel << 8) + *luma;
-
-        *yCbCr = pixel;
-
-        ++x;
-        ++yCbCr;
-        ++luma;
-
-        if(!(x & 1))
-        {
-            ++cb;
-            ++cr;
-        }
-
-        if(x < w) continue;
-
-        x = 0;
-        ++y;
-
-        if(y & 1)
-        {
-            cb -= w/2;
-            cr -= w/2;
-        }
-    }
 }

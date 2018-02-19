@@ -70,7 +70,7 @@
 
 ------------------------------------------------------------------------------*/
 
-u32 h264bsdGetBits(strmData_t *pStrmData, u32 numBits)
+inline u32 h264bsdGetBits(strmData_t *pStrmData, u32 numBits)
 {
 
     u32 out;
@@ -113,7 +113,7 @@ u32 h264bsdGetBits(strmData_t *pStrmData, u32 numBits)
 
 ------------------------------------------------------------------------------*/
 
-u32 h264bsdShowBits32(strmData_t *pStrmData)
+inline u32 h264bsdShowBits32(strmData_t *pStrmData)
 {
 
     i32 bits, shift;
@@ -186,7 +186,7 @@ u32 h264bsdShowBits32(strmData_t *pStrmData)
 
 ------------------------------------------------------------------------------*/
 #ifndef H264DEC_NEON
-u32 h264bsdFlushBits(strmData_t *pStrmData, u32 numBits)
+inline u32 h264bsdFlushBits(strmData_t *pStrmData, u32 numBits)
 {
 
     ASSERT(pStrmData);

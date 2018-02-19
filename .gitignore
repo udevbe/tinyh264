@@ -7,7 +7,7 @@ win/*.VC.db
 *.user
 *.o
 node_modules
-js/h264bsd_asm.js.map
+js/TinyH264.js.map
 *.suo
 flex/bin/
 *.swf
