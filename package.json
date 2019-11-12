@@ -1,0 +1,29 @@
+{
+  "name": "tinyh264",
+  "version": "0.0.0",
+  "description": "web assembly h264 decoder",
+  "main": "lib/index.js",
+  "module": "es/index.js",
+  "files": [
+    "es",
+    "lib"
+  ],
+  "scripts": {
+    "build-wasm": "rake clean && rake",
+    "build": "nwb build-web-module --copy-files",
+    "clean": "nwb clean-web-module",
+    "prepublishOnly": "npm run build",
+    "test": "nwb test",
+    "test:coverage": "nwb test --coverage",
+    "test:watch": "nwb test --server"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "file-loader": "^4.2.0",
+    "nwb": "0.23.x"
+  },
+  "author": "",
+  "homepage": "",
+  "license": "MIT",
+  "repository": ""
+}

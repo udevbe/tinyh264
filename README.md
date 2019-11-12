@@ -9,6 +9,8 @@ Quick tests show an up to 50% performance improvement on chrome, and up to 20% o
 
 Input is expected to be complete NALs as Uint8Array, the output result is a yuv420 buffer as Uint8Array.
 
+The code in `src` is meant to be used with a builder system like webpack as worker module.
+
 This project was created for use in [Greenfield](https://github.com/udevbe/greenfield)
 
 # Building

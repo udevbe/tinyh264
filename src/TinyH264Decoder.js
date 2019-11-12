@@ -32,66 +32,64 @@
  * An output picture may also be decoded using an H264bsdCanvas.
  * When you're done decoding, make sure to call release() to clean up internal buffers.
  */
+class TinyH264Decoder {
+  constructor (tinyH264Module, onPictureReady) {
+    this.tinyH264Module = tinyH264Module
 
-window = this
+    this.onPictureReady = onPictureReady
 
-function H264bsdDecoder (module) {
-  this.module = module
+    this.pStorage = this.tinyH264Module._h264bsdAlloc()
+    this.pWidth = this.tinyH264Module._malloc(4)
+    this.pHeight = this.tinyH264Module._malloc(4)
+    this.pPicture = this.tinyH264Module._malloc(4)
 
-  this.onPictureReady = null
+    this._decBuffer = this.tinyH264Module._malloc(1024 * 1024)
 
-  this.pStorage = module._h264bsdAlloc()
-  this.pWidth = module._malloc(4)
-  this.pHeight = module._malloc(4)
-  this.pPicture = module._malloc(4)
-
-  this._decBuffer = module._malloc(1024 * 1024)
-
-  module._h264bsdInit(this.pStorage, 0)
-}
-
-H264bsdDecoder.RDY = 0
-H264bsdDecoder.PIC_RDY = 1
-H264bsdDecoder.HDRS_RDY = 2
-H264bsdDecoder.ERROR = 3
-H264bsdDecoder.PARAM_SET_ERROR = 4
-H264bsdDecoder.MEMALLOC_ERROR = 5
-
-/**
- * Clean up memory used by the decoder
- */
-H264bsdDecoder.prototype.release = function () {
-  var module = this.module
-  var pStorage = this.pStorage
-
-  if (pStorage !== 0) {
-    module._h264bsdShutdown(pStorage)
-    module._h264bsdFree(pStorage)
+    this.tinyH264Module._h264bsdInit(this.pStorage, 0)
   }
 
-  module._free(this.pWidth)
-  module._free(this.pHeight)
-  module._free(this.pPicture)
+  release () {
+    const pStorage = this.pStorage
 
-  this.pStorage = 0
+    if (pStorage !== 0) {
+      this.tinyH264Module._h264bsdShutdown(pStorage)
+      this.tinyH264Module._h264bsdFree(pStorage)
+    }
 
-  this.pWidth = 0
-  this.pHeight = 0
-}
+    this.tinyH264Module._free(this.pWidth)
+    this.tinyH264Module._free(this.pHeight)
+    this.tinyH264Module._free(this.pPicture)
 
-H264bsdDecoder.prototype.decode = function (nal) {
-  if (nal instanceof ArrayBuffer) {
-    nal = new Uint8Array(nal)
+    this.pStorage = 0
+
+    this.pWidth = 0
+    this.pHeight = 0
   }
 
-  this.module.HEAPU8.set(nal, this._decBuffer)
+  decode (nal) {
+    if (nal instanceof ArrayBuffer) {
+      nal = new Uint8Array(nal)
+    }
 
-  var retCode = this.module._h264bsdDecode(this.pStorage, this._decBuffer, nal.byteLength, this.pPicture, this.pWidth, this.pHeight)
-  if (retCode === H264bsdDecoder.PIC_RDY) {
-    var width = this.module.getValue(this.pWidth, 'i32')
-    var height = this.module.getValue(this.pHeight, 'i32')
-    var picPtr = this.module.getValue(this.pPicture, 'i8*')
-    var pic = new Uint8Array(this.module.HEAPU8.subarray(picPtr, picPtr + (width * height) * 3 / 2))
-    this.onPictureReady(pic, width, height)
+    this.tinyH264Module.HEAPU8.set(nal, this._decBuffer)
+
+    const retCode = this.tinyH264Module._h264bsdDecode(this.pStorage, this._decBuffer, nal.byteLength, this.pPicture, this.pWidth, this.pHeight)
+    if (retCode === TinyH264Decoder.PIC_RDY) {
+      const width = this.tinyH264Module.getValue(this.pWidth, 'i32')
+      const height = this.tinyH264Module.getValue(this.pHeight, 'i32')
+      const picPtr = this.tinyH264Module.getValue(this.pPicture, 'i8*')
+      const pic = new Uint8Array(this.tinyH264Module.HEAPU8.subarray(picPtr, picPtr + (width * height) * 3 / 2))
+      this.onPictureReady(pic, width, height)
+    }
   }
 }
+
+TinyH264Decoder.RDY = 0
+TinyH264Decoder.PIC_RDY = 1
+TinyH264Decoder.HDRS_RDY = 2
+TinyH264Decoder.ERROR = 3
+TinyH264Decoder.PARAM_SET_ERROR = 4
+
+TinyH264Decoder.MEMALLOC_ERROR = 5
+
+export default TinyH264Decoder
