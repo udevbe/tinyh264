@@ -18,6 +18,4 @@ This project was created for use in [Greenfield](https://github.com/udevbe/green
 - Emscripten
 - Rake
 
-Make sure you have sourced the emscripten environment.
-
-inside the `wasm` folder run `rake clean && rake`.
+Make sure you have sourced the emscripten environment and run `npm run build`.
