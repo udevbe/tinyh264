@@ -2,14 +2,14 @@
 
 This project was forked from [h264bsd](https://github.com/oneam/h264bsd).
 
+Available on npm as `tinyh264` and meant to be used with a builder system like webpack as [worker module](https://webpack.js.org/loaders/worker-loader/).
+
 All non-essential operations like color conversions, querying cropping parameters or render to canvas have been removed.
 All required decoding operations have been moved to C to optimize performance. 
 
 Quick tests show an up to 50% performance improvement on chrome, and up to 20% on Firefox.
 
 Input is expected to be complete NALs as Uint8Array, the output result is a yuv420 buffer as Uint8Array.
-
-The code in `src` is meant to be used with a builder system like webpack as worker module.
 
 This project was created for use in [Greenfield](https://github.com/udevbe/greenfield)
 
