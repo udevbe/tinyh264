@@ -15,6 +15,14 @@ let uTexture = null
 let vTexture = null
 
 /**
+ * @type {Array<Uint8Array>}
+ */
+const h264samples = []
+
+let nroFrames = 0
+let start = 0
+
+/**
  * @param {Uint8Array} h264Nal
  */
 function decode (h264Nal) {
@@ -41,6 +49,8 @@ function onPictureReady (message) {
  * @param {number}height
  */
 function onPicture (buffer, width, height) {
+  decodeNext()
+
   canvas.width = width
   canvas.height = height
 
@@ -85,6 +95,16 @@ function release () {
   }
 }
 
+function decodeNext () {
+  const nextFrame = h264samples.shift()
+  if (nextFrame != null) {
+    decode(nextFrame)
+  } else {
+    const fps = (1000 / (Date.now() - start)) * nroFrames
+    window.alert(`Decoded ${nroFrames} (3440x1216) frames in ${Date.now() - start}ms @ ${fps >> 0}FPS`)
+  }
+}
+
 function initWebGLCanvas () {
   canvas = document.createElement('canvas')
   const gl = canvas.getContext('webgl')
@@ -116,12 +136,20 @@ function main () {
       }
     })
   }).then(() => {
-    fetch('out.h264').then(response => {
-      response.arrayBuffer().then(function (buffer) {
-        // do something with buffer
-        decode(new Uint8Array(buffer))
-      })
-    })
+    const fetches = []
+    for (let i = 0; i < 78; i++) {
+      fetches.push(fetch(`h264samples/${i}`).then(response => {
+        return response.arrayBuffer().then(function (buffer) {
+          h264samples[i] = new Uint8Array(buffer)
+        })
+      }))
+    }
+
+    return Promise.all(fetches)
+  }).then(() => {
+    nroFrames = h264samples.length
+    start = Date.now()
+    decodeNext()
   })
 }
 
