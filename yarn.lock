@@ -1839,9 +1839,9 @@ camelcase@^4.1.0:
   integrity sha1-1UVjW+HjPFQmScaRc+Xeas+uNN0=
 
 caniuse-lite@^1.0.30000844, caniuse-lite@^1.0.30000865, caniuse-lite@^1.0.30001017:
-  version "1.0.30001017"
-  resolved "https://artifactory.persgroep.cloud/artifactory/api/npm/npm/caniuse-lite/-/caniuse-lite-1.0.30001017.tgz#d3ad6ec18148b9bd991829958d9d7e562bb78cd6"
-  integrity sha1-061uwYFIub2ZGCmVjZ1+Viu3jNY=
+  version "1.0.30001019"
+  resolved "https://artifactory.persgroep.cloud/artifactory/api/npm/npm/caniuse-lite/-/caniuse-lite-1.0.30001019.tgz#857e3fccaad2b2feb3f1f6d8a8f62d747ea648e1"
+  integrity sha1-hX4/zKrSsv6z8fbYqPYtdH6mSOE=
 
 case-sensitive-paths-webpack-plugin@2.1.2:
   version "2.1.2"
@@ -2100,11 +2100,11 @@ component-inherit@0.0.3:
   integrity sha1-ZF/ErfWLcrZJ1crmUTVhnbJv8UM=
 
 compressible@~2.0.16:
-  version "2.0.17"
-  resolved "https://artifactory.persgroep.cloud/artifactory/api/npm/npm/compressible/-/compressible-2.0.17.tgz#6e8c108a16ad58384a977f3a482ca20bff2f38c1"
-  integrity sha1-bowQihatWDhKl386SCyiC/8vOME=
+  version "2.0.18"
+  resolved "https://artifactory.persgroep.cloud/artifactory/api/npm/npm/compressible/-/compressible-2.0.18.tgz#af53cca6b070d4c3c0750fbd77286a6d7cc46fba"
+  integrity sha1-r1PMprBw1MPAdQ+9dyhqbXzEb7o=
   dependencies:
-    mime-db ">= 1.40.0 < 2"
+    mime-db ">= 1.43.0 < 2"
 
 compression@^1.5.2:
   version "1.7.4"
@@ -2754,9 +2754,9 @@ ee-first@1.1.1:
   integrity sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=
 
 electron-to-chromium@^1.3.322, electron-to-chromium@^1.3.47:
-  version "1.3.322"
-  resolved "https://artifactory.persgroep.cloud/artifactory/api/npm/npm/electron-to-chromium/-/electron-to-chromium-1.3.322.tgz#a6f7e1c79025c2b05838e8e344f6e89eb83213a8"
-  integrity sha1-pvfhx5AlwrBYOOjjRPbonrgyE6g=
+  version "1.3.328"
+  resolved "https://artifactory.persgroep.cloud/artifactory/api/npm/npm/electron-to-chromium/-/electron-to-chromium-1.3.328.tgz#a619575c42f1d5b443103664f25ffa5a80190ee5"
+  integrity sha1-phlXXELx1bRDEDZk8l/6WoAZDuU=
 
 elliptic@^6.0.0:
   version "6.5.2"
@@ -5313,17 +5313,17 @@ miller-rabin@^4.0.0:
     bn.js "^4.0.0"
     brorand "^1.0.1"
 
-mime-db@1.42.0, "mime-db@>= 1.40.0 < 2":
-  version "1.42.0"
-  resolved "https://artifactory.persgroep.cloud/artifactory/api/npm/npm/mime-db/-/mime-db-1.42.0.tgz#3e252907b4c7adb906597b4b65636272cf9e7bac"
-  integrity sha1-PiUpB7THrbkGWXtLZWNics+ee6w=
+mime-db@1.43.0, "mime-db@>= 1.43.0 < 2":
+  version "1.43.0"
+  resolved "https://artifactory.persgroep.cloud/artifactory/api/npm/npm/mime-db/-/mime-db-1.43.0.tgz#0a12e0502650e473d735535050e7c8f4eb4fae58"
+  integrity sha1-ChLgUCZQ5HPXNVNQUOfI9OtPrlg=
 
 mime-types@^2.1.11, mime-types@^2.1.12, mime-types@~2.1.17, mime-types@~2.1.19, mime-types@~2.1.24, mime-types@~2.1.7:
-  version "2.1.25"
-  resolved "https://artifactory.persgroep.cloud/artifactory/api/npm/npm/mime-types/-/mime-types-2.1.25.tgz#39772d46621f93e2a80a856c53b86a62156a6437"
-  integrity sha1-OXctRmIfk+KoCoVsU7hqYhVqZDc=
+  version "2.1.26"
+  resolved "https://artifactory.persgroep.cloud/artifactory/api/npm/npm/mime-types/-/mime-types-2.1.26.tgz#9c921fc09b7e149a65dfdc0da4d20997200b0a06"
+  integrity sha1-nJIfwJt+FJpl39wNpNIJlyALCgY=
   dependencies:
-    mime-db "1.42.0"
+    mime-db "1.43.0"
 
 mime@1.6.0, mime@^1.3.4:
   version "1.6.0"
@@ -6735,9 +6735,9 @@ read-pkg@^1.0.0:
     path-type "^1.0.0"
 
 "readable-stream@1 || 2", readable-stream@2, readable-stream@^2.0.0, readable-stream@^2.0.1, readable-stream@^2.0.2, readable-stream@^2.0.6, readable-stream@^2.1.5, readable-stream@^2.2.2, readable-stream@^2.2.9, readable-stream@^2.3.0, readable-stream@^2.3.3, readable-stream@^2.3.6, readable-stream@~2.3.6:
-  version "2.3.6"
-  resolved "https://artifactory.persgroep.cloud/artifactory/api/npm/npm/readable-stream/-/readable-stream-2.3.6.tgz#b11c27d88b8ff1fbe070643cf94b0c79ae1b0aaf"
-  integrity sha1-sRwn2IuP8fvgcGQ8+UsMea4bCq8=
+  version "2.3.7"
+  resolved "https://artifactory.persgroep.cloud/artifactory/api/npm/npm/readable-stream/-/readable-stream-2.3.7.tgz#1eca1cf711aef814c04f62252a36a62f6cb23b57"
+  integrity sha1-Hsoc9xGu+BTAT2IlKjamL2yyO1c=
   dependencies:
     core-util-is "~1.0.0"
     inherits "~2.0.3"
@@ -7056,9 +7056,9 @@ resolve@1.8.1:
     path-parse "^1.0.5"
 
 resolve@^1.10.0, resolve@^1.2.0:
-  version "1.14.1"
-  resolved "https://artifactory.persgroep.cloud/artifactory/api/npm/npm/resolve/-/resolve-1.14.1.tgz#9e018c540fcf0c427d678b9931cbf45e984bcaff"
-  integrity sha1-ngGMVA/PDEJ9Z4uZMcv0XphLyv8=
+  version "1.14.2"
+  resolved "https://artifactory.persgroep.cloud/artifactory/api/npm/npm/resolve/-/resolve-1.14.2.tgz#dbf31d0fa98b1f29aa5169783b9c290cb865fea2"
+  integrity sha1-2/MdD6mLHymqUWl4O5wpDLhl/qI=
   dependencies:
     path-parse "^1.0.6"
 
@@ -8022,9 +8022,9 @@ uglify-js@3.4.x:
     source-map "~0.6.1"
 
 uglify-js@^3.1.4:
-  version "3.7.3"
-  resolved "https://artifactory.persgroep.cloud/artifactory/api/npm/npm/uglify-js/-/uglify-js-3.7.3.tgz#f918fce9182f466d5140f24bb0ff35c2d32dcc6a"
-  integrity sha1-+Rj86RgvRm1RQPJLsP81wtMtzGo=
+  version "3.7.4"
+  resolved "https://artifactory.persgroep.cloud/artifactory/api/npm/npm/uglify-js/-/uglify-js-3.7.4.tgz#e6d83a1aa32ff448bd1679359ab13d8db0fe0743"
+  integrity sha1-5tg6GqMv9Ei9Fnk1mrE9jbD+B0M=
   dependencies:
     commander "~2.20.3"
     source-map "~0.6.1"
