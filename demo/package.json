@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "babel-runtime": "^6.26.0",
     "tinyh264": "0.0.3"
   },
   "devDependencies": {
