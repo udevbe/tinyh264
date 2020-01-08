@@ -3477,10 +3477,10 @@ timers-browserify@^2.0.4:
   dependencies:
     setimmediate "^1.0.4"
 
-tinyh264@0.0.2:
-  version "0.0.2"
-  resolved "https://artifactory.persgroep.cloud/artifactory/api/npm/npm/tinyh264/-/tinyh264-0.0.2.tgz#22230e3b52aedd5e762d9e5ccd42bc4dd0ac5551"
-  integrity sha1-IiMOO1Ku3V52LZ5czUK8TdCsVVE=
+tinyh264@0.0.3:
+  version "0.0.3"
+  resolved "https://artifactory.persgroep.cloud/artifactory/api/npm/npm/tinyh264/-/tinyh264-0.0.3.tgz#3ba1805e97da5c4a855d65d2b02b55d37c90f101"
+  integrity sha1-O6GAXpfaXEqFXWXSsCtV03yQ8QE=
 
 to-arraybuffer@^1.0.0:
   version "1.0.1"
