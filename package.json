@@ -1,6 +1,6 @@
 {
   "name": "tinyh264",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "web assembly h264 decoder",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -9,8 +9,8 @@
     "lib"
   ],
   "scripts": {
-    "build-wasm": "rake clean && rake",
-    "build": "nwb build-web-module --copy-files",
+    "build-wasm": "bash build_wasm.sh",
+    "build": "npm run build-wasm && nwb build-web-module --copy-files",
     "clean": "nwb clean-web-module",
     "prepublishOnly": "npm run build",
     "test": "nwb test",
@@ -19,7 +19,6 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "file-loader": "^4.2.0",
     "nwb": "0.23.x"
   },
   "author": "Erik De Rijcke",
