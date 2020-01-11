@@ -11,21 +11,5 @@ module.exports = {
       },
       modules: false
     }
-  },
-  webpack: {
-    extra: {
-      module: {
-        rules: [
-          {
-            test: /\.wasm.asset/i,
-            use: [
-              {
-                loader: 'file-loader',
-              },
-            ],
-          },
-        ],
-      },
-    }
   }
 }

@@ -137,7 +137,7 @@ function main () {
     })
   }).then(() => {
     const fetches = []
-    for (let i = 0; i < 78; i++) {
+    for (let i = 0; i < 60; i++) {
       fetches.push(fetch(`h264samples/${i}`).then(response => {
         return response.arrayBuffer().then(function (buffer) {
           h264samples[i] = new Uint8Array(buffer)
