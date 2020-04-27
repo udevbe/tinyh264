@@ -10,7 +10,9 @@ All required decoding operations have been moved to C to optimize performance.
 
 Quick tests show an up to 50% performance improvement on chrome, and up to 20% on Firefox.
 
-Input is expected to be complete NALs (access units) as Uint8Array, the output result is a yuv420 buffer as Uint8Array.
+- Input is expected to be a picture of NALs (a complete access units or AU) as Uint8Array, the output result is a yuv420 buffer as Uint8Array.
+- Profile must be constrained-baseline or baseline. 
+- Only I and P frames are considered supported (so no B-frames).
 
 This project was created for use in [Greenfield](https://github.com/udevbe/greenfield)
 
