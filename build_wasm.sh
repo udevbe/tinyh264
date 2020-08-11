@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -e
-EMSDK_VERSION="tot-upstream"
+#EMSDK_VERSION="tot-upstream"
 #EMSDK_VERSION="latest"
+EMSDK_VERSION="1.39.15"
 
 c_files="$(ls ./native/*.c)"
 exported_functions='-s EXPORTED_FUNCTIONS=["_malloc","_free","_h264bsdAlloc","_h264bsdFree","_h264bsdInit","_h264bsdDecode","_h264bsdShutdown"]'
