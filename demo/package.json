@@ -6,14 +6,13 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --config webpack.config.js",
-    "start:dev": "webpack-dev-server"
+    "start": "webpack-dev-server"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "babel-runtime": "^6.26.0",
-    "tinyh264": "0.0.5"
+    "tinyh264": "0.0.6"
   },
   "devDependencies": {
     "file-loader": "^5.0.2",
