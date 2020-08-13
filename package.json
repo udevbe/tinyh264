@@ -1,6 +1,6 @@
 {
   "name": "tinyh264",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "web assembly h264 decoder",
   "main": "lib/index.js",
   "module": "es/index.js",
@@ -19,7 +19,7 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "nwb": "0.23.x"
+    "nwb": "0.25.2"
   },
   "author": "Erik De Rijcke",
   "homepage": "https://github.com/udevbe/tinyh264",
