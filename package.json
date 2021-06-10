@@ -23,6 +23,6 @@
   },
   "author": "Erik De Rijcke",
   "homepage": "https://github.com/udevbe/tinyh264",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "repository": "https://github.com/udevbe/tinyh264"
 }
