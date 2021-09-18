@@ -1,29 +1,10 @@
 import TinyH264Decoder from './TinyH264Decoder'
 import TinyH264 from './TinyH264'
-import tinyH264WasmURL from './TinyH264.wasm.asset'
-
-const assets = {
-  'TinyH264.wasm': tinyH264WasmURL
-}
 
 const h264Decoders = {}
 
-/**
- * @param {*}module
- */
-function loadNativeModule (module) {
-  return new Promise(resolve => {
-    if (module.calledRun) {
-      resolve()
-    } else {
-      module.onRuntimeInitialized = () => resolve()
-    }
-  })
-}
-
 function init () {
-  const tinyH264 = TinyH264({ locateFile: path => assets[path] })
-  return loadNativeModule(tinyH264).then(() => {
+  return TinyH264().then((tinyH264) => {
     self.addEventListener('message', (e) => {
       const message = e.data
       const renderStateId = message.renderStateId

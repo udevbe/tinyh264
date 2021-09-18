@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "build-wasm": "bash build_wasm.sh",
-    "build": "npm run build-wasm && nwb build-web-module --copy-files",
+    "build": "nwb build-web-module --copy-files",
     "clean": "nwb clean-web-module",
     "prepublishOnly": "npm run build",
     "test": "nwb test",

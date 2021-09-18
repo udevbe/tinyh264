@@ -3475,10 +3475,9 @@ timers-browserify@^2.0.4:
   dependencies:
     setimmediate "^1.0.4"
 
-tinyh264@0.0.6:
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/tinyh264/-/tinyh264-0.0.6.tgz#82c7b4cf707d86d18f37d9568ce3e9a314474373"
-  integrity sha512-kRtsITABm854Y4oviN30oxJc7piJuuJwZpBkhD6/Ab7ZTW/1FNnKbP5kaoAMKhdwyDq9LMAFct4/sNPBZTJD1A==
+"tinyh264@link:..":
+  version "0.0.0"
+  uid ""
 
 to-arraybuffer@^1.0.0:
   version "1.0.1"

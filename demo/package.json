@@ -12,7 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "tinyh264": "0.0.6"
+    "tinyh264": "link:.."
   },
   "devDependencies": {
     "file-loader": "^5.0.2",
